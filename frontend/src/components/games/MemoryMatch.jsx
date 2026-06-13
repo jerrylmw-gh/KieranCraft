@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
+import { applyMult, memoryBonus, roundBonus } from "@/lib/abilities";
 import { Header } from "./MathMine";
 import { Win } from "./LetterQuest";
 import Confetti from "../Confetti";
@@ -54,7 +55,8 @@ export default function MemoryMatch({ state, setState }) {
       SFX.win();
       setShowConfetti(true);
       setState((s) => {
-        const reward = Math.max(3, 10 - Math.floor(moves / 4));
+        const baseReward = Math.max(3, 10 - Math.floor(moves / 4));
+        const reward = applyMult(baseReward, s) + memoryBonus(s) + roundBonus(s);
         const next = {
           ...s,
           diamonds: s.diamonds + reward,

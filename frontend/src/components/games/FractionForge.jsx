@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
+import { applyMult, roundBonus } from "@/lib/abilities";
 import { Header, ProgressRow } from "./MathMine";
 import { Win } from "./LetterQuest";
 import Confetti from "../Confetti";
@@ -208,7 +209,7 @@ export default function FractionForge({ state, setState }) {
       SFX.win();
       setShowConfetti(true);
       setState((s) => {
-        const next = { ...s, gamesPlayed: s.gamesPlayed + 1 };
+        const next = { ...s, gamesPlayed: s.gamesPlayed + 1, diamonds: s.diamonds + roundBonus(s) };
         const { badges } = checkBadges(next);
         return { ...next, badges };
       });
@@ -228,7 +229,7 @@ export default function FractionForge({ state, setState }) {
         const fr = s.stats.fraction || { correct: 0, attempts: 0 };
         const next = {
           ...s,
-          diamonds: s.diamonds + 2, // fractions reward more
+          diamonds: s.diamonds + applyMult(2, s), // fractions reward more
           stats: { ...s.stats, fraction: { correct: fr.correct + 1, attempts: fr.attempts + 1 } },
         };
         const { badges } = checkBadges(next);

@@ -67,7 +67,7 @@ function App() {
       <BrowserRouter>
         <HUD state={state} setState={setState} onReset={onReset} />
         <Routes>
-          <Route path="/" element={<Hub state={state} />} />
+          <Route path="/" element={<Hub state={state} setState={setState} />} />
           <Route path="/rewards" element={<Rewards state={state} setState={setState} />} />
           <Route path="/play/math" element={<MathMine state={state} setState={setState} />} />
           <Route path="/play/letter" element={<LetterQuest state={state} setState={setState} />} />

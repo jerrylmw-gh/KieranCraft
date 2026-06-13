@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
+import { applyMult, roundBonus, perfectBonus } from "@/lib/abilities";
 import BlockButton from "../BlockButton";
 import Confetti from "../Confetti";
 import { Header, ProgressRow } from "./MathMine";
@@ -49,8 +50,9 @@ export default function LetterQuest({ state, setState }) {
     if (solved >= TARGET) {
       SFX.win();
       setShowConfetti(true);
+      const bonus = roundBonus(state);
       setState((s) => {
-        const next = { ...s, gamesPlayed: s.gamesPlayed + 1 };
+        const next = { ...s, gamesPlayed: s.gamesPlayed + 1, diamonds: s.diamonds + bonus };
         const { badges } = checkBadges(next);
         return { ...next, badges };
       });
@@ -69,7 +71,7 @@ export default function LetterQuest({ state, setState }) {
       setState((s) => {
         const next = {
           ...s,
-          diamonds: s.diamonds + 1,
+          diamonds: s.diamonds + applyMult(1, s),
           stats: { ...s.stats, letter: { correct: s.stats.letter.correct + 1, attempts: s.stats.letter.attempts + 1 } },
         };
         const { badges } = checkBadges(next);

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
+import { applyMult, roundBonus } from "@/lib/abilities";
 import { Header, ProgressRow } from "./MathMine";
 import { Win } from "./LetterQuest";
 import Confetti from "../Confetti";
@@ -30,7 +31,7 @@ export default function ShapeSort({ state, setState }) {
       SFX.win();
       setShowConfetti(true);
       setState((s) => {
-        const next = { ...s, gamesPlayed: s.gamesPlayed + 1 };
+        const next = { ...s, gamesPlayed: s.gamesPlayed + 1, diamonds: s.diamonds + roundBonus(s) };
         const { badges } = checkBadges(next);
         return { ...next, badges };
       });
@@ -49,7 +50,7 @@ export default function ShapeSort({ state, setState }) {
       setState((s) => {
         const next = {
           ...s,
-          diamonds: s.diamonds + 1,
+          diamonds: s.diamonds + applyMult(1, s),
           stats: { ...s.stats, shape: { correct: s.stats.shape.correct + 1, attempts: s.stats.shape.attempts + 1 } },
         };
         const { badges } = checkBadges(next);

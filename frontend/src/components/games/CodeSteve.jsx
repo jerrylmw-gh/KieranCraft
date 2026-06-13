@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges, SKINS } from "@/lib/gameState";
+import { applyMult, roundBonus } from "@/lib/abilities";
 import { Header } from "./MathMine";
 import { Win } from "./LetterQuest";
 import { CharacterAvatar } from "../PixelIcons";
@@ -163,7 +164,7 @@ export default function CodeSteve({ state, setState }) {
         setState((s) => {
           const next = {
             ...s,
-            diamonds: s.diamonds + 5,
+            diamonds: s.diamonds + applyMult(5, s) + roundBonus(s),
             gamesPlayed: s.gamesPlayed + 1,
             stats: { ...s.stats, code: { wins: s.stats.code.wins + 1 } },
           };

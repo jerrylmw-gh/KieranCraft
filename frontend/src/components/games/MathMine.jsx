@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
+import { applyMult, mathExtra, perfectBonus, roundBonus, streakBonus, getMaxHints, getMaxSkips } from "@/lib/abilities";
 import { DiamondIcon } from "../HUD";
 import BlockButton from "../BlockButton";
 import Confetti from "../Confetti";
+import GamePerks from "../GamePerks";
 
 // Year-4 level: mix of +, -, ×, ÷ with larger numbers.
 function genProblem() {
@@ -49,18 +51,24 @@ export default function MathMine({ state, setState }) {
   const [problem, setProblem] = useState(genProblem);
   const [streak, setStreak] = useState(0);
   const [solved, setSolved] = useState(0);
+  const [wrongs, setWrongs] = useState(0);
   const [feedback, setFeedback] = useState(null); // "correct" | "wrong" | null
   const [showConfetti, setShowConfetti] = useState(false);
+  const [hintsLeft, setHintsLeft] = useState(() => getMaxHints(state));
+  const [skipsLeft, setSkipsLeft] = useState(() => getMaxSkips(state));
+  const [disabledChoices, setDisabledChoices] = useState(new Set());
   const TARGET = 5;
 
   useEffect(() => {
     if (solved >= TARGET) {
       SFX.win();
       setShowConfetti(true);
+      const bonus = roundBonus(state) + (wrongs === 0 ? perfectBonus(state) : 0);
       setState((s) => {
         const next = {
           ...s,
           gamesPlayed: s.gamesPlayed + 1,
+          diamonds: s.diamonds + bonus,
         };
         const { badges } = checkBadges(next);
         return { ...next, badges };
@@ -68,20 +76,31 @@ export default function MathMine({ state, setState }) {
       const t = setTimeout(() => setShowConfetti(false), 2400);
       return () => clearTimeout(t);
     }
-  }, [solved, setState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [solved]);
+
+  const nextProblem = () => {
+    setProblem(genProblem());
+    setDisabledChoices(new Set());
+  };
 
   const choose = (val) => {
     if (feedback || solved >= TARGET) return;
+    if (disabledChoices.has(val)) return;
     const correct = val === problem.ans;
     if (correct) {
       SFX.diamond();
       setFeedback("correct");
-      setStreak((x) => x + 1);
+      const newStreak = streak + 1;
+      setStreak(newStreak);
       setSolved((x) => x + 1);
+      const base = 1 + mathExtra(state);
+      const sBonus = streakBonus(state, newStreak);
+      const gain = applyMult(base, state) + sBonus;
       setState((s) => {
         const next = {
           ...s,
-          diamonds: s.diamonds + 1,
+          diamonds: s.diamonds + gain,
           correctAnswers: s.correctAnswers + 1,
           stats: { ...s.stats, math: { correct: s.stats.math.correct + 1, attempts: s.stats.math.attempts + 1 } },
         };
@@ -90,12 +109,13 @@ export default function MathMine({ state, setState }) {
       });
       setTimeout(() => {
         setFeedback(null);
-        setProblem(genProblem());
+        nextProblem();
       }, 700);
     } else {
       SFX.wrong();
       setFeedback("wrong");
       setStreak(0);
+      setWrongs((w) => w + 1);
       setState((s) => ({
         ...s,
         stats: { ...s.stats, math: { correct: s.stats.math.correct, attempts: s.stats.math.attempts + 1 } },
@@ -104,10 +124,30 @@ export default function MathMine({ state, setState }) {
     }
   };
 
+  const useHint = () => {
+    if (hintsLeft <= 0 || feedback) return;
+    const wrongs = problem.choices.filter((c) => c !== problem.ans && !disabledChoices.has(c));
+    if (!wrongs.length) return;
+    const pick = wrongs[Math.floor(Math.random() * wrongs.length)];
+    setDisabledChoices((d) => new Set([...d, pick]));
+    setHintsLeft((n) => n - 1);
+  };
+
+  const useSkip = () => {
+    if (skipsLeft <= 0 || feedback) return;
+    setSkipsLeft((n) => n - 1);
+    setStreak(0);
+    nextProblem();
+  };
+
   const restart = () => {
     SFX.click();
     setSolved(0);
     setStreak(0);
+    setWrongs(0);
+    setHintsLeft(getMaxHints(state));
+    setSkipsLeft(getMaxSkips(state));
+    setDisabledChoices(new Set());
     setProblem(genProblem());
   };
 
@@ -126,7 +166,7 @@ export default function MathMine({ state, setState }) {
                 Level Cleared!
               </div>
               <p className="font-bold text-white text-lg mt-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.35)]">
-                +{TARGET} diamonds mined.
+                {wrongs === 0 ? "Perfect! No wrongs." : "Great work, Builder!"}
               </p>
               <div className="mt-5">
                 <BlockButton variant="diamond" size="lg" onClick={restart} textId="math-restart">
@@ -147,20 +187,29 @@ export default function MathMine({ state, setState }) {
               {problem.choices.map((c, i) => {
                 const isAns = c === problem.ans;
                 const showCorrect = feedback === "correct" && isAns;
+                const isDisabled = disabledChoices.has(c);
                 const variant = showCorrect ? "diamond" : ["dirt", "stone", "oak", "grass"][i % 4];
                 return (
                   <button
                     key={i}
                     data-testid={`math-choice-${c}`}
                     onClick={() => choose(c)}
-                    disabled={!!feedback}
-                    className={`tex-${variant} block-pop lift-hover no-rounded relative p-6 sm:p-8 font-pixel text-5xl ${variant === "stone" || variant === "dirt" ? "text-white" : "text-[#212121]"} ${showCorrect ? "anim-pop-in" : ""}`}
+                    disabled={!!feedback || isDisabled}
+                    className={`tex-${variant} block-pop lift-hover no-rounded relative p-6 sm:p-8 font-pixel text-5xl ${variant === "stone" || variant === "dirt" ? "text-white" : "text-[#212121]"} ${showCorrect ? "anim-pop-in" : ""} ${isDisabled ? "opacity-30 line-through grayscale" : ""}`}
                   >
                     <span className="relative z-10">{c}</span>
                   </button>
                 );
               })}
             </div>
+
+            <GamePerks
+              hintsLeft={hintsLeft}
+              skipsLeft={skipsLeft}
+              onHint={useHint}
+              onSkip={useSkip}
+              disabled={!!feedback}
+            />
 
             {feedback === "wrong" && (
               <div className="mt-4 text-center font-pixel uppercase text-xl text-[#212121] bg-[#FFA8A8] block-pop-sm no-rounded relative inline-block px-4 py-2 left-1/2 -translate-x-1/2">

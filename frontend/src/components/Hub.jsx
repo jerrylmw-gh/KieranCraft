@@ -2,9 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Calculator, Type, Shapes, Brain, Move, PieChart } from "lucide-react";
 import { SFX } from "@/lib/sounds";
-import { SKINS } from "@/lib/gameState";
+import { SKINS, WEAPONS } from "@/lib/gameState";
 import { CharacterAvatar, EmeraldIcon } from "./PixelIcons";
+import { WeaponIcon } from "./WeaponIcons";
 import { DiamondIcon } from "./HUD";
+import DailyChest from "./DailyChest";
 
 const GAMES = [
   { id: "math", path: "/play/math", title: "Math Mine", subtitle: "Add, Subtract, ×, ÷", Icon: Calculator, variant: "tex-stone", testId: "tile-math" },
@@ -15,8 +17,9 @@ const GAMES = [
   { id: "code", path: "/play/code", title: "Code Steve", subtitle: "Guide Steve to Diamond", Icon: Move, variant: "tex-grass", testId: "tile-code" },
 ];
 
-export default function Hub({ state }) {
+export default function Hub({ state, setState }) {
   const currentSkin = SKINS.find((s) => s.id === state.currentSkin) || SKINS[0];
+  const currentWeapon = WEAPONS.find((w) => w.id === state.currentWeapon);
   return (
     <div className="px-4 sm:px-6 lg:px-10 pb-16 pt-6">
       {/* Welcome banner */}
@@ -35,6 +38,16 @@ export default function Hub({ state }) {
               <p className="font-bold text-white/95 text-base sm:text-xl mt-1 drop-shadow-[2px_2px_0_rgba(0,0,0,0.35)]">
                 Pick a quest to start mining for diamonds.
               </p>
+              {currentWeapon && (
+                <div data-testid="equipped-weapon" className="mt-2 inline-flex items-center gap-2 bg-black/30 border-2 border-black no-rounded px-2 py-1">
+                  <div className="h-6 w-6">
+                    <WeaponIcon id={currentWeapon.id} className="h-full w-full" />
+                  </div>
+                  <span className="font-pixel uppercase text-white text-sm drop-shadow-[1px_1px_0_rgba(0,0,0,0.5)]">
+                    {currentWeapon.name}
+                  </span>
+                </div>
+              )}
             </div>
             <div className="hidden sm:flex flex-col items-center">
               <div className="anim-spin-block h-16 w-16">
@@ -50,6 +63,11 @@ export default function Hub({ state }) {
           <StatCard label="Badges" value={state.badges.length} variant="tex-gold" testId="stat-badges" />
           <StatCard label="Skins" value={state.skins.length} variant="tex-oak" testId="stat-skins" />
           <StatCard label="Wins" value={state.gamesPlayed} variant="tex-grass" testId="stat-wins" />
+        </div>
+
+        {/* Daily Chest */}
+        <div className="mb-8">
+          <DailyChest state={state} setState={setState} />
         </div>
 
         {/* Game tiles */}
