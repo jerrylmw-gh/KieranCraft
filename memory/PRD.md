@@ -32,21 +32,27 @@ A Minecraft-themed educational web game for a mildly autistic 7-9 year old child
 - Pixel-art Minecraft aesthetic (Pixelify Sans + Nunito).
 
 ## Implemented (2026-02)
-- Hub with welcome banner, stat cards, 6 tiles (5 games + Treasure Chest).
+- Hub with welcome banner, stat cards, **Daily Chest**, 6 game tiles + Treasure Chest.
 - HUD: home/rewards/diamond counter/sound toggle/reset (reset on home only).
-- Math Mine: addition/subtraction (numbers 1-18), 5 problems per round, 4 choice blocks.
-- Letter Quest: spell-the-word puzzles, 24-word bank, 5 puzzles per round, 4 letter choices.
-- Shape Sort: match a textured block (grass/dirt/stone/diamond) to its bin, 6 per round.
-- Memory Match: 6-pair card flip game with 7 pixel-art Minecraft items. Reward scales 3-10 diamonds by efficiency.
-- Code Steve: 4-level path puzzle, place U/D/L/R arrows, RUN executes program with step animation. +5 diamonds per win.
-- Treasure Chest: 6 skins (Steve, Alex, Creeper, Zombie, Enderman, Diamond Hero) — unlock with diamonds and equip. 10 badges auto-earned by stats.
-- Custom pixel-art SVG icons (Creeper, Pig, Gold, Apple, TNT, Emerald, Diamond, character avatars).
-- Pixel-block textures generated purely via CSS gradients.
-- Confetti win animation, gentle wiggle for wrong answers.
-- localStorage persistence + Reset button (with confirm prompt).
+- Math Mine: Year-4 level — addition (10-99), subtraction (up to 99), multiplication (2-12×2-12), division.
+- Fraction Forge: 4 question types — shaded fractions (pie & bar), fractions of quantity, comparing fractions, equivalent fractions.
+- Letter Quest: 36-word bank including Year-4 vocabulary (adventure, treasure, knowledge…).
+- Shape Sort, Memory Match (6 pairs), Code Steve (8 levels).
+- **Treasure Chest with 3 tabs**: Heroes / Weapons / Badges.
+- **6 Heroes** with passive abilities (perfect_bonus, memory_bonus, math_bonus, free_skip, diamond_x15).
+- **9 Weapons** (Wooden Sword → Netherite Axe) with concrete perks:
+  - Multipliers (Diamond Sword 1.5×, Netherite Axe 2×)
+  - Hint button (Stone Pickaxe, Trident, Enchanted Book, Bow)
+  - Skip button (Golden Pickaxe, Trident)
+  - Round bonus (+3 Iron, +5 Enchanted Book)
+  - Streak bonus (+1 per 5 streak Wooden Sword)
+- **Daily Chest** — 20h cooldown, random reward (5-40 diamonds, 8% chance for a free weapon).
+- 15 progress badges total.
+- localStorage persistence with reset.
 
 ## Testing
-- iteration_1: 100% frontend success rate. All 14 features verified by testing agent.
+- iteration_1: 100% frontend success rate (14/14).
+- iteration_2: 100% frontend success rate (18/18) — reward system expansion fully validated.
 
 ## Backlog
 - P1: parent-mode/PIN to view weekly progress, more word lists per grade level.
