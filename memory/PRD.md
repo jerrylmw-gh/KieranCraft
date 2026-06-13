@@ -32,27 +32,34 @@ A Minecraft-themed educational web game for a mildly autistic 7-9 year old child
 - Pixel-art Minecraft aesthetic (Pixelify Sans + Nunito).
 
 ## Implemented (2026-02)
-- Hub with welcome banner, stat cards, **Daily Chest**, 6 game tiles + Treasure Chest.
-- HUD: home/rewards/diamond counter/sound toggle/reset (reset on home only).
-- Math Mine: Year-4 level — addition (10-99), subtraction (up to 99), multiplication (2-12×2-12), division.
-- Fraction Forge: 4 question types — shaded fractions (pie & bar), fractions of quantity, comparing fractions, equivalent fractions.
-- Letter Quest: 36-word bank including Year-4 vocabulary (adventure, treasure, knowledge…).
-- Shape Sort, Memory Match (6 pairs), Code Steve (8 levels).
-- **Treasure Chest with 3 tabs**: Heroes / Weapons / Badges.
-- **6 Heroes** with passive abilities (perfect_bonus, memory_bonus, math_bonus, free_skip, diamond_x15).
-- **9 Weapons** (Wooden Sword → Netherite Axe) with concrete perks:
-  - Multipliers (Diamond Sword 1.5×, Netherite Axe 2×)
-  - Hint button (Stone Pickaxe, Trident, Enchanted Book, Bow)
-  - Skip button (Golden Pickaxe, Trident)
-  - Round bonus (+3 Iron, +5 Enchanted Book)
-  - Streak bonus (+1 per 5 streak Wooden Sword)
-- **Daily Chest** — 20h cooldown, random reward (5-40 diamonds, 8% chance for a free weapon).
-- 15 progress badges total.
-- localStorage persistence with reset.
+- Hub with welcome banner, stat cards, **Daily Chest**, 6 game tiles + Treasure Chest + **Boss Battles section**.
+- HUD: home/rewards/diamond counter/sound toggle/reset.
+- Math Mine (Year-4 +, -, ×, ÷), Fraction Forge, Letter Quest, Shape Sort, Memory Match, Code Steve (8 levels).
+- **Boss Battles** — 3 progressive bosses:
+  - Creeper King (80 HP, +40 💎, unlocks Pig Man skin)
+  - Skeleton Lord (130 HP, +80 💎, unlocks Nether King skin)
+  - Ender Dragon (220 HP, +200 💎, unlocks Dragon Slayer skin + Baby Dragon pet)
+  - Turn-based math combat: correct = damage, wrong = lose 1 heart, 3-streak = critical hit.
+- **Treasure Chest with 4 tabs**: Heroes / Weapons / Pets / Badges.
+- **12 Heroes** with rarity tiers (Common/Rare/Epic/Legendary):
+  - Common: Steve, Alex
+  - Rare: Creeper, Knight, Wizard, Zombie
+  - Epic: Enderman, Ninja, Pig Man, Diamond Hero
+  - Legendary (boss drops only): Nether King, Dragon Slayer
+- **9 Weapons** with concrete game perks (multipliers, hint/skip charges, round bonuses).
+- **7 Pets** with passive abilities + wandering animation on Hub:
+  - Common: Pig, Wolf
+  - Rare: Cat, Fox
+  - Epic: Parrot, Axolotl
+  - Legendary (Ender Dragon drop): Baby Dragon
+- **Daily Chest** — 20h cooldown, 5-40 diamonds or 8% chance for a weapon.
+- 17 progress badges total.
+- localStorage persistence.
 
 ## Testing
-- iteration_1: 100% frontend success rate (14/14).
-- iteration_2: 100% frontend success rate (18/18) — reward system expansion fully validated.
+- iteration_1: 100% (14/14)
+- iteration_2: 100% (18/18) — reward system expansion
+- iteration_3: ~95% (12/13) — pets, bosses, rarity tiers; boss-win flow code-reviewed
 
 ## Backlog
 - P1: parent-mode/PIN to view weekly progress, more word lists per grade level.
