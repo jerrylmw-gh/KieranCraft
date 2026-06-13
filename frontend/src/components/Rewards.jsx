@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { SKINS, BADGES, WEAPONS, checkBadges } from "@/lib/gameState";
+import { SKINS, BADGES, WEAPONS, PETS, RARITY, checkBadges } from "@/lib/gameState";
 import { CharacterAvatar } from "./PixelIcons";
 import { DiamondIcon } from "./HUD";
 import { WeaponIcon } from "./WeaponIcons";
+import { PetIcon } from "./PetIcons";
 import BlockButton from "./BlockButton";
 import { SFX } from "@/lib/sounds";
 import { Lock, Check } from "lucide-react";
@@ -70,6 +71,39 @@ export default function Rewards({ state, setState }) {
     flash(`Forged ${weapon.name}!`);
   };
 
+  const buyPet = (pet) => {
+    const owned = (state.pets || []).includes(pet.id);
+    if (owned) {
+      SFX.click();
+      const equipping = state.currentPet === pet.id;
+      setState((s) => ({ ...s, currentPet: equipping ? null : pet.id }));
+      flash(equipping ? `${pet.name} sent home` : `${pet.name} is your buddy now!`);
+      return;
+    }
+    if (pet.unlockReq) {
+      SFX.wrong();
+      flash(pet.unlockReq);
+      return;
+    }
+    if (state.diamonds < pet.cost) {
+      SFX.wrong();
+      flash(`Need ${pet.cost - state.diamonds} more diamonds`);
+      return;
+    }
+    SFX.badge();
+    setState((s) => {
+      const next = {
+        ...s,
+        diamonds: s.diamonds - pet.cost,
+        pets: [...(s.pets || []), pet.id],
+        currentPet: pet.id,
+      };
+      const { badges } = checkBadges(next);
+      return { ...next, badges };
+    });
+    flash(`Adopted ${pet.name}!`);
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-10 pb-16 pt-6">
       <div className="mx-auto max-w-6xl">
@@ -89,6 +123,7 @@ export default function Rewards({ state, setState }) {
         <div className="flex gap-2 sm:gap-3 mb-5 flex-wrap">
           <TabBtn id="skins" cur={tab} onClick={setTab}>Heroes</TabBtn>
           <TabBtn id="weapons" cur={tab} onClick={setTab}>Weapons</TabBtn>
+          <TabBtn id="pets" cur={tab} onClick={setTab}>Pets</TabBtn>
           <TabBtn id="badges" cur={tab} onClick={setTab}>Badges</TabBtn>
         </div>
 
@@ -106,12 +141,18 @@ export default function Rewards({ state, setState }) {
             {SKINS.map((skin) => {
               const owned = state.skins.includes(skin.id);
               const equipped = state.currentSkin === skin.id;
+              const rarity = RARITY[skin.rarity || "common"];
               return (
                 <div
                   key={skin.id}
                   data-testid={`skin-${skin.id}`}
                   className={`tex-stone block-pop no-rounded relative p-4 flex flex-col items-center ${equipped ? "outline outline-4 outline-offset-2 outline-[#FEE12B]" : ""}`}
+                  style={{ borderColor: rarity.color }}
                 >
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 font-pixel uppercase text-xs border-2 border-[#212121] no-rounded z-20`}
+                       style={{ background: rarity.color, color: skin.rarity === "legendary" ? "#212121" : "#FFFFFF" }}>
+                    {rarity.label}
+                  </div>
                   <div className="relative z-10 w-full text-center">
                     <div className="tex-dirt block-pop-sm no-rounded relative p-3 mx-auto w-fit mb-3">
                       <div className="relative h-20 w-20 anim-bob">
@@ -129,6 +170,8 @@ export default function Rewards({ state, setState }) {
                         <span className="inline-flex items-center gap-1">
                           <Check className="h-4 w-4" strokeWidth={3} /> Owned
                         </span>
+                      ) : skin.unlockReq ? (
+                        <span className="text-yellow-200 text-xs">{skin.unlockReq}</span>
                       ) : (
                         <>
                           <DiamondIcon className="h-5 w-5" />
@@ -141,18 +184,20 @@ export default function Rewards({ state, setState }) {
                       size="sm"
                       onClick={() => buySkin(skin)}
                       textId={`skin-action-${skin.id}`}
-                      disabled={equipped}
+                      disabled={equipped || (!owned && skin.unlockReq)}
                       className="w-full"
                     >
                       {equipped
                         ? "Equipped"
                         : owned
                           ? "Equip"
-                          : state.diamonds >= skin.cost ? "Unlock" : (
-                            <span className="inline-flex items-center gap-1">
-                              <Lock className="h-4 w-4" strokeWidth={3} /> Locked
-                            </span>
-                          )}
+                          : skin.unlockReq
+                            ? <span className="inline-flex items-center gap-1"><Lock className="h-4 w-4" strokeWidth={3} /> Locked</span>
+                            : state.diamonds >= skin.cost ? "Unlock" : (
+                              <span className="inline-flex items-center gap-1">
+                                <Lock className="h-4 w-4" strokeWidth={3} /> Locked
+                              </span>
+                            )}
                     </BlockButton>
                   </div>
                 </div>
@@ -215,6 +260,76 @@ export default function Rewards({ state, setState }) {
                               <Lock className="h-4 w-4" strokeWidth={3} /> Locked
                             </span>
                           )}
+                    </BlockButton>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {tab === "pets" && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-5">
+            {PETS.map((pet) => {
+              const owned = (state.pets || []).includes(pet.id);
+              const equipped = state.currentPet === pet.id;
+              const rarity = RARITY[pet.rarity || "common"];
+              return (
+                <div
+                  key={pet.id}
+                  data-testid={`pet-${pet.id}`}
+                  className={`tex-stone block-pop no-rounded relative p-4 flex flex-col items-center ${equipped ? "outline outline-4 outline-offset-2 outline-[#A8FFB2]" : ""}`}
+                >
+                  <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 font-pixel uppercase text-xs border-2 border-[#212121] no-rounded z-20`}
+                       style={{ background: rarity.color, color: pet.rarity === "legendary" ? "#212121" : "#FFFFFF" }}>
+                    {rarity.label}
+                  </div>
+                  <div className="relative z-10 w-full text-center">
+                    <div className="block-pop-sm no-rounded relative p-3 mx-auto w-fit mb-3"
+                         style={{ background: pet.color }}>
+                      <div className="relative h-20 w-20 anim-bob">
+                        <PetIcon id={pet.id} className="h-full w-full" />
+                      </div>
+                    </div>
+                    <div className="font-pixel uppercase text-xl text-white drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]">
+                      {pet.name}
+                    </div>
+                    <div className="font-bold text-white/95 text-xs mt-1 min-h-[2.5rem] px-1">
+                      {pet.abilityDesc}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 my-2 font-pixel text-lg text-white">
+                      {owned ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Check className="h-4 w-4" strokeWidth={3} /> Owned
+                        </span>
+                      ) : pet.unlockReq ? (
+                        <span className="text-yellow-200 text-xs">{pet.unlockReq}</span>
+                      ) : (
+                        <>
+                          <DiamondIcon className="h-5 w-5" />
+                          <span>{pet.cost}</span>
+                        </>
+                      )}
+                    </div>
+                    <BlockButton
+                      variant={owned ? (equipped ? "diamond" : "grass") : "gold"}
+                      size="sm"
+                      onClick={() => buyPet(pet)}
+                      textId={`pet-action-${pet.id}`}
+                      disabled={!owned && pet.unlockReq}
+                      className="w-full"
+                    >
+                      {equipped
+                        ? "Unequip"
+                        : owned
+                          ? "Adopt"
+                          : pet.unlockReq
+                            ? <span className="inline-flex items-center gap-1"><Lock className="h-4 w-4" strokeWidth={3} /> Locked</span>
+                            : state.diamonds >= pet.cost ? "Adopt" : (
+                              <span className="inline-flex items-center gap-1">
+                                <Lock className="h-4 w-4" strokeWidth={3} /> Locked
+                              </span>
+                            )}
                     </BlockButton>
                   </div>
                 </div>

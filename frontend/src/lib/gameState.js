@@ -11,6 +11,9 @@ const DEFAULT_STATE = {
   currentSkin: "steve",
   weapons: [], // unlocked weapon ids
   currentWeapon: null,
+  pets: [], // unlocked pet ids
+  currentPet: null,
+  bossWins: { creeper_king: 0, skeleton_lord: 0, ender_dragon: 0 },
   lastDailyClaim: 0, // ms timestamp
   stats: {
     math: { correct: 0, attempts: 0 },
@@ -19,16 +22,30 @@ const DEFAULT_STATE = {
     shape: { correct: 0, attempts: 0 },
     memory: { wins: 0 },
     code: { wins: 0 },
+    boss: { wins: 0 },
   },
 };
 
+export const RARITY = {
+  common: { label: "Common", color: "#9B9B9B", glow: "#FFFFFF" },
+  rare: { label: "Rare", color: "#3D6BFF", glow: "#7AA8FF" },
+  epic: { label: "Epic", color: "#A04AFF", glow: "#D094FF" },
+  legendary: { label: "Legendary", color: "#FEE12B", glow: "#FFF59A" },
+};
+
 export const SKINS = [
-  { id: "steve", name: "Steve", cost: 0, color: "#5BBAFF", face: "#E6B89C", ability: "balanced", abilityDesc: "Balanced hero — ready for anything." },
-  { id: "alex", name: "Alex", cost: 10, color: "#9ED36A", face: "#F5C5A0", ability: "perfect_bonus", abilityDesc: "+2 💎 on a perfect round (no wrongs)." },
-  { id: "creeper", name: "Creeper", cost: 25, color: "#5E9D34", face: "#3F6B22", ability: "memory_bonus", abilityDesc: "+3 💎 per Memory Match win." },
-  { id: "zombie", name: "Zombie", cost: 50, color: "#79553A", face: "#5E9D34", ability: "math_bonus", abilityDesc: "+1 💎 per Math correct answer." },
-  { id: "enderman", name: "Enderman", cost: 100, color: "#212121", face: "#A04AFF", ability: "free_skip", abilityDesc: "1 free Skip in every game." },
-  { id: "diamond_hero", name: "Diamond Hero", cost: 200, color: "#51EBE1", face: "#FFFFFF", ability: "diamond_x15", abilityDesc: "1.5× all diamond rewards." },
+  { id: "steve", name: "Steve", cost: 0, rarity: "common", color: "#5BBAFF", face: "#E6B89C", ability: "balanced", abilityDesc: "Balanced hero — ready for anything." },
+  { id: "alex", name: "Alex", cost: 10, rarity: "common", color: "#9ED36A", face: "#F5C5A0", ability: "perfect_bonus", abilityDesc: "+2 💎 on a perfect round (no wrongs)." },
+  { id: "creeper", name: "Creeper", cost: 25, rarity: "rare", color: "#5E9D34", face: "#3F6B22", ability: "memory_bonus", abilityDesc: "+3 💎 per Memory Match win." },
+  { id: "knight", name: "Knight", cost: 40, rarity: "rare", color: "#D0D0E0", face: "#FFD7A0", ability: "math_bonus", abilityDesc: "+1 💎 per Math correct answer." },
+  { id: "wizard", name: "Wizard", cost: 60, rarity: "rare", color: "#A04AFF", face: "#FFD7A0", ability: "hint_master", abilityDesc: "+2 Hints per game." },
+  { id: "zombie", name: "Zombie", cost: 50, rarity: "rare", color: "#79553A", face: "#5E9D34", ability: "math_bonus", abilityDesc: "+1 💎 per Math correct answer." },
+  { id: "enderman", name: "Enderman", cost: 100, rarity: "epic", color: "#212121", face: "#A04AFF", ability: "free_skip", abilityDesc: "1 free Skip in every game." },
+  { id: "ninja", name: "Ninja", cost: 120, rarity: "epic", color: "#212121", face: "#8B5CF6", ability: "streak_x2", abilityDesc: "Double streak bonus (+2 every 5 in a row)." },
+  { id: "pig_man", name: "Pig Man", cost: 150, rarity: "epic", color: "#F4A8B8", face: "#D88498", ability: "memory_bonus", abilityDesc: "+3 💎 per Memory Match win." },
+  { id: "diamond_hero", name: "Diamond Hero", cost: 200, rarity: "epic", color: "#51EBE1", face: "#FFFFFF", ability: "diamond_x15", abilityDesc: "1.5× all diamond rewards." },
+  { id: "nether_king", name: "Nether King", cost: 0, rarity: "legendary", color: "#A03030", face: "#FFD700", ability: "all_bonus", abilityDesc: "+1 💎 in any game + 1 Hint.", unlockReq: "Beat Skeleton Lord" },
+  { id: "dragon_slayer", name: "Dragon Slayer", cost: 0, rarity: "legendary", color: "#FEE12B", face: "#FFFFFF", ability: "ultimate", abilityDesc: "2× diamonds + 2 Hints + 2 Skips.", unlockReq: "Beat Ender Dragon" },
 ];
 
 export const WEAPONS = [
@@ -41,6 +58,16 @@ export const WEAPONS = [
   { id: "trident", name: "Trident", cost: 150, type: "trident", color: "#2BB8B0", perkDesc: "3 Skips + 3 Hints per game." },
   { id: "enchanted_book", name: "Enchanted Book", cost: 200, type: "book", color: "#A04AFF", perkDesc: "+5 💎 per round + 1 Hint." },
   { id: "netherite_axe", name: "Netherite Axe", cost: 300, type: "axe", color: "#3B2E2A", perkDesc: "2× ALL diamonds (replaces other multipliers)." },
+];
+
+export const PETS = [
+  { id: "pig", name: "Pig", cost: 10, rarity: "common", color: "#F4A8B8", abilityDesc: "+2 💎 per round cleared." },
+  { id: "wolf", name: "Wolf", cost: 30, rarity: "common", color: "#D0D0D0", abilityDesc: "+1 Hint per game." },
+  { id: "cat", name: "Cat", cost: 40, rarity: "rare", color: "#3B2E2A", abilityDesc: "+1 Skip per game." },
+  { id: "fox", name: "Fox", cost: 75, rarity: "rare", color: "#E07A4A", abilityDesc: "+1 💎 per correct in any game." },
+  { id: "parrot", name: "Parrot", cost: 120, rarity: "epic", color: "#5BBAFF", abilityDesc: "Reveals 1 extra wrong in Math." },
+  { id: "axolotl", name: "Axolotl", cost: 180, rarity: "epic", color: "#FFB6E1", abilityDesc: "+5 💎 on a perfect round." },
+  { id: "baby_dragon", name: "Baby Dragon", cost: 0, rarity: "legendary", color: "#A04AFF", abilityDesc: "1.5× ALL diamonds.", unlockReq: "Beat Ender Dragon" },
 ];
 
 export const BADGES = [
@@ -59,6 +86,9 @@ export const BADGES = [
   { id: "weapon_3", name: "Armorer", icon: "⚔️", desc: "Own 3 weapons" },
   { id: "weapon_6", name: "Weapon Master", icon: "🛡️", desc: "Own 6 weapons" },
   { id: "skin_3", name: "Style Switcher", icon: "🎭", desc: "Own 3 skins" },
+  { id: "pet_3", name: "Pet Friend", icon: "🐾", desc: "Adopt 3 pets" },
+  { id: "boss_1", name: "Boss Slayer", icon: "⚔️", desc: "Beat 1 boss" },
+  { id: "boss_3", name: "Champion", icon: "👑", desc: "Beat all 3 bosses" },
 ];
 
 export function loadState() {
@@ -98,6 +128,12 @@ export function checkBadges(state) {
     ["weapon_3", () => (state.weapons?.length || 0) >= 3],
     ["weapon_6", () => (state.weapons?.length || 0) >= 6],
     ["skin_3", () => (state.skins?.length || 0) >= 3],
+    ["pet_3", () => (state.pets?.length || 0) >= 3],
+    ["boss_1", () => (state.stats.boss?.wins || 0) >= 1],
+    ["boss_3", () => {
+      const bw = state.bossWins || {};
+      return (bw.creeper_king || 0) >= 1 && (bw.skeleton_lord || 0) >= 1 && (bw.ender_dragon || 0) >= 1;
+    }],
   ];
   const newlyEarned = [];
   for (const [id, ok] of rules) {

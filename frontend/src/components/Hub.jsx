@@ -1,12 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calculator, Type, Shapes, Brain, Move, PieChart } from "lucide-react";
+import { Calculator, Type, Shapes, Brain, Move, PieChart, Sword, Crown } from "lucide-react";
 import { SFX } from "@/lib/sounds";
-import { SKINS, WEAPONS } from "@/lib/gameState";
+import { SKINS, WEAPONS, PETS } from "@/lib/gameState";
 import { CharacterAvatar, EmeraldIcon } from "./PixelIcons";
 import { WeaponIcon } from "./WeaponIcons";
+import { PetIcon, BOSSES } from "./PetIcons";
 import { DiamondIcon } from "./HUD";
 import DailyChest from "./DailyChest";
+import PetCompanion from "./PetCompanion";
 
 const GAMES = [
   { id: "math", path: "/play/math", title: "Math Mine", subtitle: "Add, Subtract, ×, ÷", Icon: Calculator, variant: "tex-stone", testId: "tile-math" },
@@ -20,6 +22,7 @@ const GAMES = [
 export default function Hub({ state, setState }) {
   const currentSkin = SKINS.find((s) => s.id === state.currentSkin) || SKINS[0];
   const currentWeapon = WEAPONS.find((w) => w.id === state.currentWeapon);
+  const currentPet = PETS.find((p) => p.id === state.currentPet);
   return (
     <div className="px-4 sm:px-6 lg:px-10 pb-16 pt-6">
       {/* Welcome banner */}
@@ -30,6 +33,7 @@ export default function Hub({ state, setState }) {
               <div className="relative h-16 w-16 sm:h-20 sm:w-20 anim-bob">
                 <CharacterAvatar skin={currentSkin} className="h-full w-full" />
               </div>
+              <PetCompanion petId={currentPet?.id} />
             </div>
             <div className="flex-1 min-w-0">
               <h1 data-testid="hub-title" className="font-pixel text-3xl sm:text-5xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.4)] uppercase leading-tight">
@@ -122,6 +126,56 @@ export default function Hub({ state, setState }) {
               <p className="font-bold text-base mt-1 opacity-95">Badges & Skins</p>
             </div>
           </Link>
+        </div>
+
+        {/* Boss Battles */}
+        <h2 className="font-pixel text-2xl sm:text-3xl uppercase text-[#212121] mt-10 mb-4 drop-shadow-[2px_2px_0_rgba(255,255,255,0.5)] flex items-center gap-2">
+          <Crown className="h-7 w-7" strokeWidth={3} /> Boss Battles
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {Object.entries(BOSSES).map(([id, b], idx) => {
+            const beaten = (state.bossWins?.[id] || 0) >= 1;
+            const prevId = idx === 1 ? "creeper_king" : idx === 2 ? "skeleton_lord" : null;
+            const locked = prevId && (state.bossWins?.[prevId] || 0) < 1;
+            return (
+              <Link
+                key={id}
+                to={locked ? "#" : `/play/boss?boss=${id}`}
+                data-testid={`tile-boss-${id}`}
+                onClick={(e) => {
+                  if (locked) {
+                    e.preventDefault();
+                    SFX.wrong();
+                    return;
+                  }
+                  SFX.click();
+                }}
+                className={`${locked ? "tex-stone opacity-70" : "tex-dirt"} block-pop ${locked ? "" : "lift-hover"} no-rounded relative p-5 min-h-[180px] flex flex-col justify-between text-white ${locked ? "cursor-not-allowed" : ""}`}
+              >
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="bg-black/40 border-2 border-black no-rounded relative h-16 w-16 flex items-center justify-center">
+                    <b.Icon className="h-12 w-12 relative z-10" />
+                  </div>
+                  <div className={`${beaten ? "bg-[#FEE12B] text-[#212121]" : locked ? "bg-stone-600 text-white" : "bg-[#FF6B73] text-white"} font-pixel uppercase px-2 py-1 text-xs`}>
+                    {beaten ? "Beaten" : locked ? "Locked" : "Fight!"}
+                  </div>
+                </div>
+                <div className="relative z-10 mt-3">
+                  <h3 className="font-pixel text-xl sm:text-2xl uppercase leading-tight drop-shadow-[2px_2px_0_rgba(0,0,0,0.4)]">
+                    {b.name}
+                  </h3>
+                  <p className="font-bold text-sm mt-1 opacity-95">
+                    {locked ? `Beat ${idx === 1 ? "Creeper King" : "Skeleton Lord"} first` : `${b.hp} HP • +${b.baseReward} 💎`}
+                  </p>
+                  {b.unlockSkinName && !beaten && !locked && (
+                    <p className="font-pixel uppercase text-yellow-300 text-xs mt-1">
+                      ✦ Win to unlock {b.unlockSkinName}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         <div className="mt-10 mx-auto max-w-3xl tex-sky block-pop no-rounded relative p-5">
