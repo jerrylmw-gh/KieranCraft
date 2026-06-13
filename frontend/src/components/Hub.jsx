@@ -1,13 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calculator, Type, Shapes, Brain, Move } from "lucide-react";
+import { Calculator, Type, Shapes, Brain, Move, PieChart } from "lucide-react";
 import { SFX } from "@/lib/sounds";
 import { SKINS } from "@/lib/gameState";
 import { CharacterAvatar, EmeraldIcon } from "./PixelIcons";
 import { DiamondIcon } from "./HUD";
 
 const GAMES = [
-  { id: "math", path: "/play/math", title: "Math Mine", subtitle: "Add & Subtract Blocks", Icon: Calculator, variant: "tex-stone", testId: "tile-math" },
+  { id: "math", path: "/play/math", title: "Math Mine", subtitle: "Add, Subtract, ×, ÷", Icon: Calculator, variant: "tex-stone", testId: "tile-math" },
+  { id: "fraction", path: "/play/fraction", title: "Fraction Forge", subtitle: "Pies, Bars & Equivalents", Icon: PieChart, variant: "tex-diamond", testId: "tile-fraction" },
   { id: "letter", path: "/play/letter", title: "Letter Quest", subtitle: "Dig Out the Right Letter", Icon: Type, variant: "tex-oak", testId: "tile-letter" },
   { id: "shape", path: "/play/shape", title: "Shape Sort", subtitle: "Match Color & Shape", Icon: Shapes, variant: "tex-diamond", testId: "tile-shape" },
   { id: "memory", path: "/play/memory", title: "Memory Match", subtitle: "Find Matching Blocks", Icon: Brain, variant: "tex-gold", testId: "tile-memory" },

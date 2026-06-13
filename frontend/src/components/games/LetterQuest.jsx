@@ -6,10 +6,16 @@ import Confetti from "../Confetti";
 import { Header, ProgressRow } from "./MathMine";
 
 const WORDS = [
-  "CREEPER", "DIAMOND", "ZOMBIE", "STEVE", "ALEX", "PICKAXE",
-  "EMERALD", "TORCH", "BLOCK", "GRASS", "STONE", "WATER",
-  "APPLE", "GOLD", "IRON", "OAK", "SHEEP", "PIG",
-  "COW", "ARROW", "SWORD", "CHEST", "HOUSE", "ENDER",
+  // Minecraft words
+  "CREEPER", "DIAMOND", "ZOMBIE", "PICKAXE", "EMERALD", "TORCH",
+  "ENDERMAN", "VILLAGER", "SKELETON", "REDSTONE", "OBSIDIAN", "NETHER",
+  // Year-4 vocabulary
+  "ADVENTURE", "TREASURE", "KNOWLEDGE", "CHARACTER", "MOUNTAIN", "JOURNEY",
+  "DISCOVER", "DRAGON", "CASTLE", "BRIDGE", "FOREST", "ISLAND",
+  "DESERT", "OCEAN", "WIZARD", "POTION", "MAGIC", "ARROW",
+  "SHIELD", "ARMOR", "EXPLORE", "BRAVE", "QUEST", "SECRET",
+  "HARVEST", "GARDEN", "BUTTER", "RABBIT", "DOLPHIN", "EAGLE",
+  "PLANET", "ROCKET", "GALAXY", "FUTURE", "STRONG", "FRIEND",
 ];
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }

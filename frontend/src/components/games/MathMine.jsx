@@ -5,15 +5,40 @@ import { DiamondIcon } from "../HUD";
 import BlockButton from "../BlockButton";
 import Confetti from "../Confetti";
 
+// Year-4 level: mix of +, -, ×, ÷ with larger numbers.
 function genProblem() {
-  const op = Math.random() < 0.5 ? "+" : "-";
-  let a = Math.floor(Math.random() * 18) + 1;
-  let b = Math.floor(Math.random() * 10) + 1;
-  if (op === "-" && b > a) [a, b] = [b, a];
-  const ans = op === "+" ? a + b : a - b;
+  const ops = ["+", "-", "+", "-", "×", "×", "÷"]; // bias toward + - × for variety
+  const op = ops[Math.floor(Math.random() * ops.length)];
+  let a, b, ans;
+  if (op === "+") {
+    a = Math.floor(Math.random() * 80) + 10; // 10-89
+    b = Math.floor(Math.random() * 60) + 5;  // 5-64
+    ans = a + b;
+  } else if (op === "-") {
+    a = Math.floor(Math.random() * 80) + 20; // 20-99
+    b = Math.floor(Math.random() * (a - 5)) + 1;
+    ans = a - b;
+  } else if (op === "×") {
+    a = Math.floor(Math.random() * 11) + 2; // 2-12
+    b = Math.floor(Math.random() * 11) + 2; // 2-12
+    ans = a * b;
+  } else {
+    // division — guarantee divisible
+    b = Math.floor(Math.random() * 11) + 2; // 2-12
+    const q = Math.floor(Math.random() * 11) + 2; // 2-12
+    a = b * q;
+    ans = q;
+  }
+  // build 4 plausible choices
   const distractors = new Set([ans]);
-  while (distractors.size < 4) {
-    const d = ans + (Math.floor(Math.random() * 7) - 3) + (Math.random() < 0.5 ? 1 : -1);
+  let guard = 0;
+  while (distractors.size < 4 && guard++ < 50) {
+    let delta;
+    if (op === "×") delta = Math.floor(Math.random() * 11) - 5;
+    else if (op === "÷") delta = Math.floor(Math.random() * 7) - 3;
+    else delta = Math.floor(Math.random() * 21) - 10;
+    if (delta === 0) delta = 1;
+    const d = ans + delta;
     if (d >= 0 && d !== ans) distractors.add(d);
   }
   const choices = Array.from(distractors).sort(() => Math.random() - 0.5);
