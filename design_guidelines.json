@@ -1,0 +1,99 @@
+{
+  "theme": "LIGHT",
+  "archetype": "6 (Vibrant Play) - Minecraft Pixel Art Variant",
+  "typography": {
+    "heading_font": "Pixelify Sans, monospace",
+    "body_font": "Nunito, sans-serif",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-bold tracking-tight text-[#212121] uppercase drop-shadow-md",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight text-[#212121] drop-shadow-sm",
+      "h3": "text-xl sm:text-2xl font-bold text-[#212121]",
+      "body": "text-base sm:text-lg font-bold text-[#212121]",
+      "labels": "text-sm sm:text-base font-extrabold uppercase tracking-widest text-[#212121]"
+    },
+    "instruction_notes": "Load 'Pixelify Sans' and 'Nunito' from Google Fonts. Use Pixelify Sans for all titles, buttons, and big numbers. Use Nunito for any instructional sentences to maintain high readability for the child."
+  },
+  "colors": {
+    "primary_grass": "#5E9D34",
+    "secondary_dirt": "#79553A",
+    "surface_stone": "#9B9B9B",
+    "surface_oak": "#B8945F",
+    "accent_diamond": "#51EBE1",
+    "accent_gold": "#FEE12B",
+    "background_sky": "#78A7FF",
+    "text_dark": "#212121",
+    "text_light": "#FFFFFF",
+    "error_soft": "#FFA8A8",
+    "success_soft": "#A8FFB2"
+  },
+  "layout_spacing": {
+    "philosophy": "High predictability, large tap targets, and extremely clear visual hierarchy to lower cognitive load for a mildly autistic child.",
+    "container_padding": "p-4 sm:p-8 md:p-12",
+    "gap_standard": "gap-6 sm:gap-8",
+    "grid_bento": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+  },
+  "components": {
+    "buttons": {
+      "base": "relative inline-flex items-center justify-center px-8 py-4 bg-[#B8945F] border-4 border-[#212121] text-[#212121] font-heading text-xl uppercase transition-transform active:translate-y-1 active:shadow-none hover:-translate-y-1",
+      "shadow": "shadow-[4px_4px_0px_#212121]",
+      "bevel": "shadow-[inset_-4px_-4px_0px_rgba(0,0,0,0.15),inset_4px_4px_0px_rgba(255,255,255,0.2)]",
+      "primary": "bg-[#5E9D34] text-white border-[#212121]",
+      "accent": "bg-[#51EBE1] text-[#212121] border-[#212121]"
+    },
+    "cards": {
+      "base": "bg-[#9B9B9B] border-4 border-[#212121] p-6 flex flex-col items-center justify-center shadow-[6px_6px_0px_#212121]",
+      "inner_bevel": "shadow-[inset_-6px_-6px_0px_rgba(0,0,0,0.15),inset_6px_6px_0px_rgba(255,255,255,0.3)]",
+      "interactive": "transition-transform hover:-translate-y-2 cursor-pointer active:translate-y-1 active:shadow-[2px_2px_0px_#212121]"
+    },
+    "progress_bar": {
+      "container": "w-full h-8 bg-[#212121] border-4 border-[#212121] rounded-none p-1 relative",
+      "fill": "h-full bg-[#5E9D34] shadow-[inset_0_4px_0px_rgba(255,255,255,0.3)]"
+    },
+    "badges": {
+      "base": "w-16 h-16 bg-[#FEE12B] border-4 border-[#212121] flex items-center justify-center shadow-[4px_4px_0px_#212121] transform rotate-3"
+    }
+  },
+  "animations": {
+    "hover": "Subtle scale up (scale-105) and translate-y up. Keep it gentle.",
+    "active": "Press down effect (translate-y-1, reduce shadow to 0).",
+    "success": "Confetti particle effect, block scale bounce, and a diamond sparkle rotation.",
+    "error": "Gentle horizontal shake (max 2px left/right). NEVER use harsh red flashing. Use soft colors and 'Try Again' text.",
+    "loading": "A 3D spinning pixel block or a filling experience bar."
+  },
+  "sound_design": {
+    "notes": "MUST include a prominent, global 'Sound Off/On' toggle button on the Hub. For autistic children, sensory overload is a risk. Sounds should be soft 'pop' for block placements, gentle 'ding' for experience/diamonds, and NO harsh buzzers for wrong answers.",
+    "success_sound": "Gentle chime (like picking up an XP orb).",
+    "click_sound": "Soft wooden click (like opening a chest)."
+  },
+  "media": {
+    "image_urls": {
+      "hero_background": {
+        "url": "https://images.unsplash.com/photo-1754339745872-c0d834316827?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHw0fHxtaW5lY3JhZnQlMjBibG9jayUyMHRleHR1cmUlMjBkaXJ0JTIwZ3Jhc3MlMjBzdG9uZXxlbnwwfHx8fDE3ODEzNTM4ODB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Green grass block texture for backgrounds or tile bases."
+      },
+      "dirt_texture": {
+        "url": "https://images.unsplash.com/photo-1742403413053-265cb765d7d6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODl8MHwxfHNlYXJjaHwzfHxtaW5lY3JhZnQlMjBibG9jayUyMHRleHR1cmUlMjBkaXJ0JTIwZ3Jhc3MlMjBzdG9uZXxlbnwwfHx8fDE3ODEzNTM4ODB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Dirt/brown texture for ground or borders."
+      },
+      "diamond_item": {
+        "url": "https://images.unsplash.com/photo-1767481626778-1a1b18976eaf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MjJ8MHwxfHNlYXJjaHwxfHxtaW5lY3JhZnQlMjBkaWFtb25kJTIwZW1lcmFsZCUyMHBpeGVsJTIwYXJ0fGVufDB8fHx8MTc4MTM1Mzg4MHww&ixlib=rb-4.1.0&q=85",
+        "description": "Glowing green diamond/emerald shape used for rewards."
+      },
+      "character_steve": {
+        "url": "https://images.unsplash.com/photo-1759663175900-5f224551467c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODF8MHwxfHNlYXJjaHw0fHxtaW5lY3JhZnQlMjBjaGFyYWN0ZXIlMjBzdGV2ZSUyMHBpeGVsJTIwYXJ0fGVufDB8fHx8MTc4MTM1Mzg4MHww&ixlib=rb-4.1.0&q=85",
+        "description": "Steve character toy used for 'Code Steve' game tile."
+      }
+    }
+  },
+  "instructions_to_main_agent": [
+    "Load 'Pixelify Sans' (headings) and 'Nunito' (body) from Google Fonts.",
+    "Use Lucide-react icons heavily, but wrap them in blocky squares to fit the theme.",
+    "Construct the UI using raw Tailwind HTML divs for cards and buttons to achieve the 'border-4 border-black shadow-[4px_4px_0_#000]' retro 8-bit effect.",
+    "Do NOT use standard Shadcn cards with rounded corners and soft shadows. Use the custom blocky styles defined in this JSON.",
+    "Implement 5 game tiles on the Hub: Math Mine, Letter Quest, Shape Sort, Memory Match, Code Steve. Each should be a large, clickable blocky card.",
+    "Implement a Top Navigation / HUD showing: Diamond count, Settings (Sound toggle icon), and a Profile avatar.",
+    "All interactive elements MUST have clear 'data-testid' attributes (e.g., 'sound-toggle-btn', 'math-mine-tile', 'diamond-counter').",
+    "Keep text minimal. Instructions should be short (e.g., 'Find 5 Diamonds!', 'Match the Blocks').",
+    "Ensure 'Try Again' states are gentle, never using harsh red screens. Use #FFA8A8 and encouraging text."
+  ]
+}
