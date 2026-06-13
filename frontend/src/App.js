@@ -1,53 +1,80 @@
-import { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import { loadState, saveState, resetState, checkBadges } from "@/lib/gameState";
+import HUD from "@/components/HUD";
+import Hub from "@/components/Hub";
+import Rewards from "@/components/Rewards";
+import MathMine from "@/components/games/MathMine";
+import LetterQuest from "@/components/games/LetterQuest";
+import ShapeSort from "@/components/games/ShapeSort";
+import MemoryMatch from "@/components/games/MemoryMatch";
+import CodeSteve from "@/components/games/CodeSteve";
+import { Toaster, toast } from "sonner";
 
 function App() {
+  const [state, setState] = useState(loadState);
+
+  // Persist
+  useEffect(() => {
+    saveState(state);
+  }, [state]);
+
+  // Detect newly-earned badges and toast them
+  const prevBadgesRef = React.useRef(state.badges);
+  useEffect(() => {
+    const prev = new Set(prevBadgesRef.current);
+    const newOnes = state.badges.filter((b) => !prev.has(b));
+    if (newOnes.length) {
+      newOnes.forEach((b) =>
+        toast.success(`Badge unlocked: ${b.replace(/_/g, " ")}`, {
+          duration: 3200,
+          style: {
+            background: "#FEE12B",
+            border: "4px solid #212121",
+            boxShadow: "4px 4px 0 #212121",
+            borderRadius: 0,
+            color: "#212121",
+            fontFamily: "'Pixelify Sans', monospace",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          },
+        }),
+      );
+    }
+    prevBadgesRef.current = state.badges;
+  }, [state.badges]);
+
+  // After any setState updates that change diamonds/stats but didn't include checkBadges,
+  // ensure badges keep in sync (idempotent safety net).
+  useEffect(() => {
+    const { badges, newlyEarned } = checkBadges(state);
+    if (newlyEarned.length) {
+      setState((s) => ({ ...s, badges }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.diamonds, state.gamesPlayed]);
+
+  const onReset = () => {
+    resetState();
+    setState(loadState());
+  };
+
   return (
-    <div className="App">
+    <div className="App tex-sky min-h-screen">
       <BrowserRouter>
+        <HUD state={state} setState={setState} onReset={onReset} />
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+          <Route path="/" element={<Hub state={state} />} />
+          <Route path="/rewards" element={<Rewards state={state} setState={setState} />} />
+          <Route path="/play/math" element={<MathMine state={state} setState={setState} />} />
+          <Route path="/play/letter" element={<LetterQuest state={state} setState={setState} />} />
+          <Route path="/play/shape" element={<ShapeSort state={state} setState={setState} />} />
+          <Route path="/play/memory" element={<MemoryMatch state={state} setState={setState} />} />
+          <Route path="/play/code" element={<CodeSteve state={state} setState={setState} />} />
         </Routes>
+        <Toaster position="top-center" />
       </BrowserRouter>
     </div>
   );
