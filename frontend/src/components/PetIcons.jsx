@@ -135,6 +135,36 @@ export function BabyDragonPet({ className = "" }) {
   );
 }
 
+export function PhoenixPet({ className = "" }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} shapeRendering="crispEdges">
+      {/* tail flames */}
+      <rect x="1" y="9" width="2" height="3" fill="#FF6B00" />
+      <rect x="0" y="11" width="2" height="2" fill="#FFB200" />
+      {/* body */}
+      <rect x="3" y="6" width="8" height="6" fill="#FF6B00" />
+      <rect x="3" y="6" width="8" height="2" fill="#FFB200" />
+      {/* head */}
+      <rect x="9" y="3" width="4" height="4" fill="#FF3D00" />
+      <rect x="9" y="3" width="4" height="1" fill="#FFB200" />
+      {/* crest */}
+      <rect x="10" y="1" width="2" height="2" fill="#FFE066" />
+      <rect x="11" y="0" width="1" height="1" fill="#FFFFFF" />
+      {/* eye */}
+      <rect x="11" y="5" width="1" height="1" fill="#FFFFFF" />
+      <rect x="12" y="5" width="1" height="1" fill="#212121" />
+      {/* beak */}
+      <rect x="13" y="5" width="2" height="1" fill="#FFE066" />
+      {/* wings */}
+      <rect x="4" y="8" width="3" height="3" fill="#FFB200" />
+      <rect x="5" y="9" width="2" height="2" fill="#FFE066" />
+      {/* feet */}
+      <rect x="4" y="12" width="2" height="2" fill="#FFB200" />
+      <rect x="8" y="12" width="2" height="2" fill="#FFB200" />
+    </svg>
+  );
+}
+
 const PET_ICONS = {
   pig: PigPet,
   wolf: WolfPet,
@@ -143,6 +173,7 @@ const PET_ICONS = {
   parrot: ParrotPet,
   axolotl: AxolotlPet,
   baby_dragon: BabyDragonPet,
+  phoenix: PhoenixPet,
 };
 
 export function PetIcon({ id, className = "" }) {

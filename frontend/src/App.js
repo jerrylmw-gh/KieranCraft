@@ -12,6 +12,7 @@ import MemoryMatch from "@/components/games/MemoryMatch";
 import CodeSteve from "@/components/games/CodeSteve";
 import FractionForge from "@/components/games/FractionForge";
 import BossBattle from "@/components/games/BossBattle";
+import EndlessMath from "@/components/games/EndlessMath";
 import { Toaster, toast } from "sonner";
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
           <Route path="/play/code" element={<CodeSteve state={state} setState={setState} />} />
           <Route path="/play/fraction" element={<FractionForge state={state} setState={setState} />} />
           <Route path="/play/boss" element={<BossBattle state={state} setState={setState} />} />
+          <Route path="/play/endless" element={<EndlessMath state={state} setState={setState} />} />
         </Routes>
         <Toaster position="top-center" />
       </BrowserRouter>

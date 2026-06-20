@@ -2,53 +2,20 @@ import React, { useEffect, useMemo, useState } from "react";
 import { SFX } from "@/lib/sounds";
 import { checkBadges } from "@/lib/gameState";
 import { applyMult, mathExtra, perfectBonus, roundBonus, streakBonus, getMaxHints, getMaxSkips } from "@/lib/abilities";
+import { genMathProblem } from "@/lib/problems";
 import { DiamondIcon } from "../HUD";
 import BlockButton from "../BlockButton";
 import Confetti from "../Confetti";
 import GamePerks from "../GamePerks";
 
-// Year-4 level: mix of +, -, ×, ÷ with larger numbers.
-function genProblem() {
-  const ops = ["+", "-", "+", "-", "×", "×", "÷"]; // bias toward + - × for variety
-  const op = ops[Math.floor(Math.random() * ops.length)];
-  let a, b, ans;
-  if (op === "+") {
-    a = Math.floor(Math.random() * 80) + 10; // 10-89
-    b = Math.floor(Math.random() * 60) + 5;  // 5-64
-    ans = a + b;
-  } else if (op === "-") {
-    a = Math.floor(Math.random() * 80) + 20; // 20-99
-    b = Math.floor(Math.random() * (a - 5)) + 1;
-    ans = a - b;
-  } else if (op === "×") {
-    a = Math.floor(Math.random() * 11) + 2; // 2-12
-    b = Math.floor(Math.random() * 11) + 2; // 2-12
-    ans = a * b;
-  } else {
-    // division — guarantee divisible
-    b = Math.floor(Math.random() * 11) + 2; // 2-12
-    const q = Math.floor(Math.random() * 11) + 2; // 2-12
-    a = b * q;
-    ans = q;
-  }
-  // build 4 plausible choices
-  const distractors = new Set([ans]);
-  let guard = 0;
-  while (distractors.size < 4 && guard++ < 50) {
-    let delta;
-    if (op === "×") delta = Math.floor(Math.random() * 11) - 5;
-    else if (op === "÷") delta = Math.floor(Math.random() * 7) - 3;
-    else delta = Math.floor(Math.random() * 21) - 10;
-    if (delta === 0) delta = 1;
-    const d = ans + delta;
-    if (d >= 0 && d !== ans) distractors.add(d);
-  }
-  const choices = Array.from(distractors).sort(() => Math.random() - 0.5);
-  return { a, b, op, ans, choices };
+function genProblem(diff) {
+  return genMathProblem(diff || "normal");
 }
 
+// Year-4 level: mix of +, -, ×, ÷ with larger numbers.
 export default function MathMine({ state, setState }) {
-  const [problem, setProblem] = useState(genProblem);
+  const diff = state.difficulty || "normal";
+  const [problem, setProblem] = useState(() => genProblem(diff));
   const [streak, setStreak] = useState(0);
   const [solved, setSolved] = useState(0);
   const [wrongs, setWrongs] = useState(0);
@@ -80,7 +47,7 @@ export default function MathMine({ state, setState }) {
   }, [solved]);
 
   const nextProblem = () => {
-    setProblem(genProblem());
+    setProblem(genProblem(diff));
     setDisabledChoices(new Set());
   };
 
@@ -148,7 +115,7 @@ export default function MathMine({ state, setState }) {
     setHintsLeft(getMaxHints(state));
     setSkipsLeft(getMaxSkips(state));
     setDisabledChoices(new Set());
-    setProblem(genProblem());
+    setProblem(genProblem(diff));
   };
 
   return (
@@ -178,9 +145,14 @@ export default function MathMine({ state, setState }) {
         ) : (
           <>
             <div className={`tex-stone block-pop no-rounded relative mt-6 p-8 text-center ${feedback === "wrong" ? "anim-wiggle" : ""}`}>
-              <div className="relative z-10 font-pixel text-5xl sm:text-7xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
-                {problem.a} {problem.op} {problem.b} = ?
+              <div className="relative z-10 font-pixel text-4xl sm:text-6xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
+                {problem.display || `${problem.a} ${problem.op} ${problem.b}`} = ?
               </div>
+              {diff === "hard" && (
+                <div className="relative z-10 mt-2 inline-block bg-[#FF1493] border-2 border-[#212121] no-rounded px-2 py-0.5 font-pixel uppercase text-white text-xs">
+                  Hard Mode
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">

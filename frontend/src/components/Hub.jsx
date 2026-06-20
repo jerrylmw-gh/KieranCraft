@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Calculator, Type, Shapes, Brain, Move, PieChart, Sword, Crown } from "lucide-react";
+import { Calculator, Type, Shapes, Brain, Move, PieChart, Sword, Crown, Infinity, Flame } from "lucide-react";
 import { SFX } from "@/lib/sounds";
 import { SKINS, WEAPONS, PETS } from "@/lib/gameState";
 import { CharacterAvatar, EmeraldIcon } from "./PixelIcons";
@@ -17,6 +17,7 @@ const GAMES = [
   { id: "shape", path: "/play/shape", title: "Shape Sort", subtitle: "Match Color & Shape", Icon: Shapes, variant: "tex-diamond", testId: "tile-shape" },
   { id: "memory", path: "/play/memory", title: "Memory Match", subtitle: "Find Matching Blocks", Icon: Brain, variant: "tex-gold", testId: "tile-memory" },
   { id: "code", path: "/play/code", title: "Code Steve", subtitle: "Guide Steve to Diamond", Icon: Move, variant: "tex-grass", testId: "tile-code" },
+  { id: "endless", path: "/play/endless", title: "Endless Marathon", subtitle: "How long can you streak?", Icon: Infinity, variant: "tex-dirt", testId: "tile-endless" },
 ];
 
 export default function Hub({ state, setState }) {
@@ -69,9 +70,25 @@ export default function Hub({ state, setState }) {
           <StatCard label="Wins" value={state.gamesPlayed} variant="tex-grass" testId="stat-wins" />
         </div>
 
-        {/* Daily Chest */}
-        <div className="mb-8">
+        {/* Daily Chest + Difficulty Toggle */}
+        <div className="mb-6 grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-3 items-stretch">
           <DailyChest state={state} setState={setState} />
+          <button
+            data-testid="difficulty-toggle"
+            onClick={() => {
+              SFX.click();
+              setState((s) => ({ ...s, difficulty: s.difficulty === "hard" ? "normal" : "hard" }));
+            }}
+            className={`${state.difficulty === "hard" ? "tex-diamond" : "tex-stone"} block-pop lift-hover no-rounded relative px-5 py-3 inline-flex items-center justify-center gap-2 ${state.difficulty === "hard" ? "text-[#212121]" : "text-white"}`}
+          >
+            <Flame className="h-5 w-5 relative z-10" strokeWidth={3} />
+            <div className="relative z-10 text-left">
+              <div className="font-pixel uppercase text-xs leading-none">Mode</div>
+              <div className="font-pixel uppercase text-lg leading-none mt-1">
+                {state.difficulty === "hard" ? "HARD" : "NORMAL"}
+              </div>
+            </div>
+          </button>
         </div>
 
         {/* Game tiles */}
@@ -177,6 +194,62 @@ export default function Hub({ state, setState }) {
             );
           })}
         </div>
+
+        {/* Nightmare Boss Tier — unlocked after beating all 3 normal bosses */}
+        {(() => {
+          const allNormal = (state.bossWins?.creeper_king || 0) >= 1 &&
+                            (state.bossWins?.skeleton_lord || 0) >= 1 &&
+                            (state.bossWins?.ender_dragon || 0) >= 1;
+          if (!allNormal) return null;
+          return (
+            <>
+              <h2 className="font-pixel text-2xl sm:text-3xl uppercase text-[#FF1493] mt-10 mb-1 drop-shadow-[2px_2px_0_rgba(33,33,33,0.4)] flex items-center gap-2">
+                <Flame className="h-7 w-7" strokeWidth={3} /> Nightmare Mode
+              </h2>
+              <p className="font-bold text-[#212121] text-sm mb-4 drop-shadow-[1px_1px_0_rgba(255,255,255,0.4)]">
+                3× HP • Hard problems • Mythic drops only here.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                {Object.entries(BOSSES).map(([id, b]) => {
+                  const nmBeaten = (state.nightmareWins?.[id] || 0) >= 1;
+                  const dropName = id === "creeper_king" ? "Magma Beast"
+                                : id === "skeleton_lord" ? "Frost King"
+                                : "Shadow Ender";
+                  return (
+                    <Link
+                      key={"nm-" + id}
+                      to={`/play/boss?boss=${id}&nightmare=1`}
+                      data-testid={`tile-nightmare-${id}`}
+                      onClick={() => SFX.click()}
+                      className="block-pop lift-hover no-rounded relative p-5 min-h-[180px] flex flex-col justify-between text-white"
+                      style={{ background: "linear-gradient(135deg, #1a0024 0%, #4a0080 100%)" }}
+                    >
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div className="bg-black/60 border-2 border-[#FF1493] no-rounded relative h-16 w-16 flex items-center justify-center">
+                          <b.Icon className="h-12 w-12 relative z-10" />
+                        </div>
+                        <div className={`${nmBeaten ? "bg-[#FF1493] text-white" : "bg-[#FF3D00] text-white"} font-pixel uppercase px-2 py-1 text-xs border-2 border-black`}>
+                          {nmBeaten ? "Cleared" : "Nightmare"}
+                        </div>
+                      </div>
+                      <div className="relative z-10 mt-3">
+                        <h3 className="font-pixel text-xl sm:text-2xl uppercase leading-tight drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)] text-[#FF87C8]">
+                          Nightmare {b.name}
+                        </h3>
+                        <p className="font-bold text-sm mt-1 opacity-95">
+                          {b.hp * 3} HP • +{b.baseReward * 3} 💎
+                        </p>
+                        <p className="font-pixel uppercase text-[#FF1493] text-xs mt-1">
+                          ✦ Mythic Drop: {dropName}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })()}
 
         <div className="mt-10 mx-auto max-w-3xl tex-sky block-pop no-rounded relative p-5">
           <p className="relative z-10 font-bold text-[#212121] text-center">

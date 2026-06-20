@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { SFX } from "@/lib/sounds";
-import { checkBadges, SKINS } from "@/lib/gameState";
+import { checkBadges, SKINS, WEAPONS, PETS } from "@/lib/gameState";
 import { applyMult, roundBonus, getMaxHints, getMaxSkips } from "@/lib/abilities";
+import { genMathProblem } from "@/lib/problems";
 import { BOSSES } from "../PetIcons";
 import { CharacterAvatar } from "../PixelIcons";
 import { Header } from "./MathMine";
@@ -11,8 +12,16 @@ import Confetti from "../Confetti";
 import GamePerks from "../GamePerks";
 import { Heart, Swords } from "lucide-react";
 
+// Mythic drops per Nightmare boss
+const NIGHTMARE_DROPS = {
+  creeper_king: { skin: "magma_beast", skinName: "Magma Beast", weapon: "inferno_blade", weaponName: "Inferno Blade" },
+  skeleton_lord: { skin: "frost_king", skinName: "Frost King", weapon: "frost_bow", weaponName: "Frost Bow" },
+  ender_dragon: { skin: "shadow_ender", skinName: "Shadow Ender", weapon: "void_scythe", weaponName: "Void Scythe" },
+};
+
 // Generates harder problems suitable for boss battle
-function genBossProblem(difficulty) {
+function genBossProblem(difficulty, nightmare) {
+  if (nightmare) return genMathProblem("hard");
   // difficulty: 1, 2, or 3
   const ops = difficulty === 1 ? ["+", "-", "×"] : difficulty === 2 ? ["×", "÷", "+"] : ["×", "÷"];
   const op = ops[Math.floor(Math.random() * ops.length)];
@@ -41,7 +50,7 @@ function genBossProblem(difficulty) {
     const d = ans + Math.floor(Math.random() * 19) - 9;
     if (d >= 0 && d !== ans) distractors.add(d);
   }
-  return { a, b, op, ans, choices: Array.from(distractors).sort(() => Math.random() - 0.5) };
+  return { a, b, op, ans, display: `${a} ${op} ${b}`, choices: Array.from(distractors).sort(() => Math.random() - 0.5) };
 }
 
 const PLAYER_MAX_HP = 5;
@@ -49,19 +58,24 @@ const PLAYER_MAX_HP = 5;
 export default function BossBattle({ state, setState }) {
   const [searchParams] = useSearchParams();
   const bossId = searchParams.get("boss") || "creeper_king";
-  const boss = BOSSES[bossId] || BOSSES.creeper_king;
+  const nightmare = searchParams.get("nightmare") === "1";
+  const baseBoss = BOSSES[bossId] || BOSSES.creeper_king;
+  const boss = nightmare
+    ? { ...baseBoss, name: `Nightmare ${baseBoss.name}`, hp: baseBoss.hp * 3, baseReward: baseBoss.baseReward * 3 }
+    : baseBoss;
   const difficulty = bossId === "creeper_king" ? 1 : bossId === "skeleton_lord" ? 2 : 3;
   const navigate = useNavigate();
 
   const [bossHp, setBossHp] = useState(boss.hp);
-  const [playerHp, setPlayerHp] = useState(PLAYER_MAX_HP);
+  const playerMaxHp = nightmare ? 7 : 5;
+  const [playerHp, setPlayerHp] = useState(playerMaxHp);
   const [streak, setStreak] = useState(0);
-  const [problem, setProblem] = useState(() => genBossProblem(difficulty));
-  const [feedback, setFeedback] = useState(null); // "hit" | "miss" | "crit"
+  const [problem, setProblem] = useState(() => genBossProblem(difficulty, nightmare));
+  const [feedback, setFeedback] = useState(null);
   const [shakingBoss, setShakingBoss] = useState(false);
   const [shakingPlayer, setShakingPlayer] = useState(false);
-  const [floatNum, setFloatNum] = useState(null); // {amount, target, color}
-  const [outcome, setOutcome] = useState(null); // "win" | "lose"
+  const [floatNum, setFloatNum] = useState(null);
+  const [outcome, setOutcome] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hintsLeft, setHintsLeft] = useState(() => getMaxHints(state));
   const [skipsLeft, setSkipsLeft] = useState(() => getMaxSkips(state));
@@ -81,19 +95,39 @@ export default function BossBattle({ state, setState }) {
       setState((s) => {
         const reward = applyMult(boss.baseReward, s) + roundBonus(s);
         const prevBossWins = s.bossWins || {};
+        const prevNm = s.nightmareWins || {};
         const next = {
           ...s,
           diamonds: s.diamonds + reward,
           gamesPlayed: s.gamesPlayed + 1,
-          bossWins: { ...prevBossWins, [bossId]: (prevBossWins[bossId] || 0) + 1 },
           stats: { ...s.stats, boss: { wins: (s.stats.boss?.wins || 0) + 1 } },
         };
-        // Unlock legendary skin/pet on first win
-        if (boss.unlockSkin && !(s.skins || []).includes(boss.unlockSkin)) {
-          next.skins = [...s.skins, boss.unlockSkin];
-        }
-        if (boss.unlockPet && !(s.pets || []).includes(boss.unlockPet)) {
-          next.pets = [...(s.pets || []), boss.unlockPet];
+        if (nightmare) {
+          next.nightmareWins = { ...prevNm, [bossId]: (prevNm[bossId] || 0) + 1 };
+          // Mythic drops
+          const drop = NIGHTMARE_DROPS[bossId];
+          if (drop) {
+            if (drop.skin && !(s.skins || []).includes(drop.skin)) {
+              next.skins = [...s.skins, drop.skin];
+            }
+            if (drop.weapon && !(s.weapons || []).includes(drop.weapon)) {
+              next.weapons = [...(s.weapons || []), drop.weapon];
+            }
+          }
+          // Phoenix pet unlocks when all 3 nightmare bosses beaten
+          const nmAfter = next.nightmareWins;
+          const allNm = (nmAfter.creeper_king || 0) >= 1 && (nmAfter.skeleton_lord || 0) >= 1 && (nmAfter.ender_dragon || 0) >= 1;
+          if (allNm && !(s.pets || []).includes("phoenix")) {
+            next.pets = [...(s.pets || []), "phoenix"];
+          }
+        } else {
+          next.bossWins = { ...prevBossWins, [bossId]: (prevBossWins[bossId] || 0) + 1 };
+          if (boss.unlockSkin && !(s.skins || []).includes(boss.unlockSkin)) {
+            next.skins = [...s.skins, boss.unlockSkin];
+          }
+          if (boss.unlockPet && !(s.pets || []).includes(boss.unlockPet)) {
+            next.pets = [...(s.pets || []), boss.unlockPet];
+          }
         }
         const { badges } = checkBadges(next);
         return { ...next, badges, _bossReward: reward };
@@ -109,7 +143,7 @@ export default function BossBattle({ state, setState }) {
   }, [bossHp, playerHp]);
 
   const nextProblem = () => {
-    setProblem(genBossProblem(difficulty));
+    setProblem(genBossProblem(difficulty, nightmare));
     setDisabledChoices(new Set());
   };
 
@@ -164,9 +198,9 @@ export default function BossBattle({ state, setState }) {
   const retry = () => {
     SFX.click();
     setBossHp(boss.hp);
-    setPlayerHp(PLAYER_MAX_HP);
+    setPlayerHp(playerMaxHp);
     setStreak(0);
-    setProblem(genBossProblem(difficulty));
+    setProblem(genBossProblem(difficulty, nightmare));
     setHintsLeft(getMaxHints(state));
     setSkipsLeft(getMaxSkips(state));
     setDisabledChoices(new Set());
@@ -193,7 +227,7 @@ export default function BossBattle({ state, setState }) {
           <HpBar
             label="You"
             cur={playerHp}
-            max={PLAYER_MAX_HP}
+            max={playerMaxHp}
             color="#5E9D34"
             unit="heart"
             testId="player-hp"
@@ -236,26 +270,36 @@ export default function BossBattle({ state, setState }) {
         </div>
 
         {outcome === "win" ? (
-          <div className="tex-grass block-pop no-rounded relative p-7 text-center anim-pop-in">
+          <div className={`${nightmare ? "tex-diamond" : "tex-grass"} block-pop no-rounded relative p-7 text-center anim-pop-in`}>
             <div className="relative z-10">
-              <div className="font-pixel uppercase text-4xl sm:text-5xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.4)]">
-                Victory!
+              <div className={`font-pixel uppercase text-4xl sm:text-5xl ${nightmare ? "text-[#212121]" : "text-white"} drop-shadow-[3px_3px_0_rgba(0,0,0,0.4)]`}>
+                {nightmare ? "✦ NIGHTMARE CLEARED ✦" : "Victory!"}
               </div>
-              <p className="font-bold text-white text-lg mt-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.35)]">
+              <p className={`font-bold ${nightmare ? "text-[#212121]" : "text-white"} text-lg mt-2`}>
                 Defeated {boss.name}! +{state._bossReward || boss.baseReward} diamonds.
               </p>
-              {boss.unlockSkin && (
+              {nightmare && NIGHTMARE_DROPS[bossId] && (
+                <div className="mt-3 space-y-1">
+                  <p className="font-pixel uppercase text-[#FF1493] text-xl drop-shadow-[2px_2px_0_rgba(0,0,0,0.4)]">
+                    ✦ MYTHIC SKIN: {NIGHTMARE_DROPS[bossId].skinName}
+                  </p>
+                  <p className="font-pixel uppercase text-[#FF1493] text-xl drop-shadow-[2px_2px_0_rgba(0,0,0,0.4)]">
+                    ✦ MYTHIC WEAPON: {NIGHTMARE_DROPS[bossId].weaponName}
+                  </p>
+                </div>
+              )}
+              {!nightmare && boss.unlockSkin && (
                 <p className="font-pixel uppercase text-yellow-200 text-xl mt-2 drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]">
                   ✦ Legendary Skin Unlocked: {boss.unlockSkinName}!
                 </p>
               )}
-              {boss.unlockPet && (
+              {!nightmare && boss.unlockPet && (
                 <p className="font-pixel uppercase text-yellow-200 text-xl mt-1 drop-shadow-[2px_2px_0_rgba(0,0,0,0.5)]">
                   ✦ Legendary Pet Unlocked: {boss.unlockPetName}!
                 </p>
               )}
               <div className="mt-5 flex flex-wrap gap-3 justify-center">
-                <BlockButton variant="diamond" size="md" onClick={retry} textId="boss-retry">
+                <BlockButton variant={nightmare ? "grass" : "diamond"} size="md" onClick={retry} textId="boss-retry">
                   Fight Again
                 </BlockButton>
                 <BlockButton variant="gold" size="md" onClick={() => navigate("/")} textId="boss-home">
@@ -282,11 +326,12 @@ export default function BossBattle({ state, setState }) {
         ) : (
           <>
             <div className={`tex-stone block-pop no-rounded relative p-6 sm:p-7 text-center mb-4 ${feedback === "miss" ? "anim-wiggle" : ""}`}>
-              <div className="relative z-10 font-pixel text-4xl sm:text-6xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
-                {problem.a} {problem.op} {problem.b} = ?
+              <div className="relative z-10 font-pixel text-3xl sm:text-5xl text-white drop-shadow-[3px_3px_0_rgba(0,0,0,0.5)]">
+                {problem.display || `${problem.a} ${problem.op} ${problem.b}`} = ?
               </div>
               <div className="relative z-10 mt-2 text-white font-pixel uppercase text-sm">
                 Streak: x{streak} {streak >= 2 && <span className="text-[#FEE12B]">— Crit next!</span>}
+                {nightmare && <span className="ml-2 text-[#FF1493]">✦ NIGHTMARE</span>}
               </div>
             </div>
 
