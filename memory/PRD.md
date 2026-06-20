@@ -32,34 +32,37 @@ A Minecraft-themed educational web game for a mildly autistic 7-9 year old child
 - Pixel-art Minecraft aesthetic (Pixelify Sans + Nunito).
 
 ## Implemented (2026-02)
-- Hub with welcome banner, stat cards, **Daily Chest**, 6 game tiles + Treasure Chest + **Boss Battles section**.
+- Hub with welcome banner, stat cards, **Daily Chest**, **Difficulty Toggle (Normal/Hard)**, 7 game tiles + Boss Battles + **Nightmare Mode** + Treasure Chest.
 - HUD: home/rewards/diamond counter/sound toggle/reset.
-- Math Mine (Year-4 +, -, ×, ÷), Fraction Forge, Letter Quest, Shape Sort, Memory Match, Code Steve (8 levels).
-- **Boss Battles** — 3 progressive bosses:
-  - Creeper King (80 HP, +40 💎, unlocks Pig Man skin)
-  - Skeleton Lord (130 HP, +80 💎, unlocks Nether King skin)
-  - Ender Dragon (220 HP, +200 💎, unlocks Dragon Slayer skin + Baby Dragon pet)
-  - Turn-based math combat: correct = damage, wrong = lose 1 heart, 3-streak = critical hit.
-- **Treasure Chest with 4 tabs**: Heroes / Weapons / Pets / Badges.
-- **12 Heroes** with rarity tiers (Common/Rare/Epic/Legendary):
+- **Hard Mode**: 3-digit add/sub, 15×15 multiplication, multi-step problems, harder fractions, longer words.
+- **Endless Math Marathon**: survival mode, 3 lives, streak-based score multipliers (×1 → ×4 at streak 30).
+- **Normal Bosses**: Creeper King (80 HP), Skeleton Lord (130 HP), Ender Dragon (220 HP). Drops Legendary skin + Baby Dragon pet.
+- **Nightmare Boss Tier** (unlocked after beating all 3 normal): 3× HP, hard problems, +7 hearts. Drops Mythic skin + Mythic weapon. Defeat all 3 = Phoenix pet.
+- **Treasure Chest 4 tabs**: Heroes / Weapons / Pets / Badges.
+- **15 Heroes** with rarity tiers + abilities:
   - Common: Steve, Alex
   - Rare: Creeper, Knight, Wizard, Zombie
   - Epic: Enderman, Ninja, Pig Man, Diamond Hero
-  - Legendary (boss drops only): Nether King, Dragon Slayer
-- **9 Weapons** with concrete game perks (multipliers, hint/skip charges, round bonuses).
-- **7 Pets** with passive abilities + wandering animation on Hub:
+  - Legendary: Nether King, Dragon Slayer
+  - **Mythic** (Nightmare-only): Magma Beast, Frost King, Shadow Ender
+- **12 Weapons** with concrete game perks (multipliers, hint/skip/round bonuses):
+  - Normal: Wooden Sword, Stone Pickaxe, Iron Sword, Golden Pickaxe, Bow & Arrow, Diamond Sword, Trident, Enchanted Book, Netherite Axe (1.5×–2× multipliers)
+  - **Mythic**: Inferno Blade (Crit ×2 in Boss), Frost Bow (5 Hints), Void Scythe (2.5× ALL diamonds)
+- **8 Pets** with passive abilities + wandering Hub animation:
   - Common: Pig, Wolf
   - Rare: Cat, Fox
   - Epic: Parrot, Axolotl
-  - Legendary (Ender Dragon drop): Baby Dragon
-- **Daily Chest** — 20h cooldown, 5-40 diamonds or 8% chance for a weapon.
-- 17 progress badges total.
+  - Legendary: Baby Dragon
+  - **Mythic**: Phoenix (2× diamonds + free hint/skip)
+- **Daily Chest** — 20h cooldown, 5-40 💎 or 8% chance for a weapon.
+- 22 progress badges total.
 - localStorage persistence.
 
 ## Testing
 - iteration_1: 100% (14/14)
 - iteration_2: 100% (18/18) — reward system expansion
-- iteration_3: ~95% (12/13) — pets, bosses, rarity tiers; boss-win flow code-reviewed
+- iteration_3: ~95% (12/13) — pets, bosses, rarity tiers
+- iteration_4: 100% — Hard mode, Nightmare bosses, Mythic tier, Endless Marathon
 
 ## Backlog
 - P1: parent-mode/PIN to view weekly progress, more word lists per grade level.
