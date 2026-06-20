@@ -18,9 +18,16 @@ export function diamondMultiplier(state) {
   const skin = activeSkin(state);
   const weapon = activeWeapon(state);
   const pet = activePet(state);
-  // Highest override
+  // Mythic overrides
+  if (weapon?.id === "void_scythe") return 2.5;
   if (weapon?.id === "netherite_axe") return 2;
   if (skin?.id === "dragon_slayer") return 2;
+  if (skin?.id === "shadow_ender") return 2;
+  if (skin?.id === "frost_king") return 2;
+  if (skin?.id === "magma_beast") return 1.5;
+  if (weapon?.id === "inferno_blade") return 2;
+  if (weapon?.id === "frost_bow") return 2;
+  if (pet?.id === "phoenix") return 2;
   let mult = 1;
   if (weapon?.id === "diamond_sword") mult *= 1.5;
   if (skin?.ability === "diamond_x15") mult *= 1.5;
@@ -30,12 +37,13 @@ export function diamondMultiplier(state) {
 
 export function applyMult(base, state) {
   const v = base * diamondMultiplier(state);
-  // Add flat per-correct bonus from fox pet + nether_king "all_bonus"
+  // Add flat per-correct bonus from fox/nether_king/magma_beast/phoenix
   let extra = 0;
   const pet = activePet(state);
   const skin = activeSkin(state);
   if (pet?.id === "fox") extra += 1;
   if (skin?.id === "nether_king") extra += 1;
+  if (skin?.id === "magma_beast") extra += 2;
   return Math.max(1, Math.round(v) + extra);
 }
 
@@ -74,15 +82,6 @@ export function perfectBonus(state) {
 }
 
 // Streak bonus (every 5 in a row)
-export function streakBonus(state, streak) {
-  const weapon = activeWeapon(state);
-  const skin = activeSkin(state);
-  if (weapon?.id === "wooden_sword" && streak > 0 && streak % 5 === 0) {
-    return skin?.ability === "streak_x2" ? 2 : 1;
-  }
-  return 0;
-}
-
 export function getMaxHints(state) {
   const weapon = activeWeapon(state);
   const skin = activeSkin(state);
@@ -92,11 +91,15 @@ export function getMaxHints(state) {
   if (weapon?.id === "enchanted_book") h += 1;
   if (weapon?.id === "trident") h += 3;
   if (weapon?.id === "bow_arrow") h += 1;
+  if (weapon?.id === "frost_bow") h += 5;
   if (skin?.ability === "hint_master") h += 2;
   if (skin?.id === "nether_king") h += 1;
   if (skin?.id === "dragon_slayer") h += 2;
+  if (skin?.id === "magma_beast") h += 2;
+  if (skin?.id === "shadow_ender") h += 3;
   if (pet?.id === "wolf") h += 1;
   if (pet?.id === "parrot") h += 1;
+  if (pet?.id === "phoenix") h += 1;
   return h;
 }
 
@@ -107,10 +110,24 @@ export function getMaxSkips(state) {
   let s = 0;
   if (skin?.ability === "free_skip") s += 1;
   if (skin?.id === "dragon_slayer") s += 2;
+  if (skin?.id === "frost_king") s += 2;
+  if (skin?.id === "shadow_ender") s += 3;
   if (weapon?.id === "golden_pickaxe") s += 1;
   if (weapon?.id === "trident") s += 3;
   if (pet?.id === "cat") s += 1;
+  if (pet?.id === "phoenix") s += 1;
   return s;
+}
+
+// Streak bonus
+export function streakBonus(state, streak) {
+  const weapon = activeWeapon(state);
+  const skin = activeSkin(state);
+  if (weapon?.id === "wooden_sword" && streak > 0 && streak % 5 === 0) {
+    if (skin?.ability === "streak_x2" || skin?.id === "magma_beast") return 2;
+    return 1;
+  }
+  return 0;
 }
 
 // Daily chest cooldown (20h)

@@ -6,6 +6,7 @@ const DEFAULT_STATE = {
   correctAnswers: 0,
   gamesPlayed: 0,
   soundOn: true,
+  difficulty: "normal", // "normal" | "hard"
   badges: [], // ids
   skins: ["steve"], // unlocked
   currentSkin: "steve",
@@ -14,6 +15,8 @@ const DEFAULT_STATE = {
   pets: [], // unlocked pet ids
   currentPet: null,
   bossWins: { creeper_king: 0, skeleton_lord: 0, ender_dragon: 0 },
+  nightmareWins: { creeper_king: 0, skeleton_lord: 0, ender_dragon: 0 },
+  endlessHighScore: 0,
   lastDailyClaim: 0, // ms timestamp
   stats: {
     math: { correct: 0, attempts: 0 },
@@ -23,6 +26,7 @@ const DEFAULT_STATE = {
     memory: { wins: 0 },
     code: { wins: 0 },
     boss: { wins: 0 },
+    endless: { best: 0 },
   },
 };
 
@@ -31,6 +35,7 @@ export const RARITY = {
   rare: { label: "Rare", color: "#3D6BFF", glow: "#7AA8FF" },
   epic: { label: "Epic", color: "#A04AFF", glow: "#D094FF" },
   legendary: { label: "Legendary", color: "#FEE12B", glow: "#FFF59A" },
+  mythic: { label: "Mythic", color: "#FF1493", glow: "#FF87C8" },
 };
 
 export const SKINS = [
@@ -46,6 +51,10 @@ export const SKINS = [
   { id: "diamond_hero", name: "Diamond Hero", cost: 200, rarity: "epic", color: "#51EBE1", face: "#FFFFFF", ability: "diamond_x15", abilityDesc: "1.5× all diamond rewards." },
   { id: "nether_king", name: "Nether King", cost: 0, rarity: "legendary", color: "#A03030", face: "#FFD700", ability: "all_bonus", abilityDesc: "+1 💎 in any game + 1 Hint.", unlockReq: "Beat Skeleton Lord" },
   { id: "dragon_slayer", name: "Dragon Slayer", cost: 0, rarity: "legendary", color: "#FEE12B", face: "#FFFFFF", ability: "ultimate", abilityDesc: "2× diamonds + 2 Hints + 2 Skips.", unlockReq: "Beat Ender Dragon" },
+  // Mythic — from Nightmare wins
+  { id: "magma_beast", name: "Magma Beast", cost: 0, rarity: "mythic", color: "#FF3D00", face: "#FFE0B0", ability: "mythic_fire", abilityDesc: "+2 💎 per correct + 2 Hints + Streak ×2.", unlockReq: "Beat Nightmare Creeper King" },
+  { id: "frost_king", name: "Frost King", cost: 0, rarity: "mythic", color: "#7AC8FF", face: "#FFFFFF", ability: "mythic_ice", abilityDesc: "2× diamonds + 2 Skips + +1 hp in Boss.", unlockReq: "Beat Nightmare Skeleton Lord" },
+  { id: "shadow_ender", name: "Shadow Ender", cost: 0, rarity: "mythic", color: "#0D0D0D", face: "#FF1493", ability: "mythic_void", abilityDesc: "2× diamonds + 3 Hints + 3 Skips.", unlockReq: "Beat Nightmare Ender Dragon" },
 ];
 
 export const WEAPONS = [
@@ -58,6 +67,10 @@ export const WEAPONS = [
   { id: "trident", name: "Trident", cost: 150, type: "trident", color: "#2BB8B0", perkDesc: "3 Skips + 3 Hints per game." },
   { id: "enchanted_book", name: "Enchanted Book", cost: 200, type: "book", color: "#A04AFF", perkDesc: "+5 💎 per round + 1 Hint." },
   { id: "netherite_axe", name: "Netherite Axe", cost: 300, type: "axe", color: "#3B2E2A", perkDesc: "2× ALL diamonds (replaces other multipliers)." },
+  // Mythic weapons — from Nightmare wins
+  { id: "inferno_blade", name: "Inferno Blade", cost: 0, rarity: "mythic", type: "sword", color: "#FF3D00", perkDesc: "2× diamonds + Crit dmg ×2 in Boss.", unlockReq: "Beat Nightmare Creeper King" },
+  { id: "frost_bow", name: "Frost Bow", cost: 0, rarity: "mythic", type: "bow", color: "#7AC8FF", perkDesc: "2× diamonds + 5 Hints per game.", unlockReq: "Beat Nightmare Skeleton Lord" },
+  { id: "void_scythe", name: "Void Scythe", cost: 0, rarity: "mythic", type: "scythe", color: "#FF1493", perkDesc: "2.5× ALL diamonds (mythic multiplier).", unlockReq: "Beat Nightmare Ender Dragon" },
 ];
 
 export const PETS = [
@@ -68,6 +81,8 @@ export const PETS = [
   { id: "parrot", name: "Parrot", cost: 120, rarity: "epic", color: "#5BBAFF", abilityDesc: "Reveals 1 extra wrong in Math." },
   { id: "axolotl", name: "Axolotl", cost: 180, rarity: "epic", color: "#FFB6E1", abilityDesc: "+5 💎 on a perfect round." },
   { id: "baby_dragon", name: "Baby Dragon", cost: 0, rarity: "legendary", color: "#A04AFF", abilityDesc: "1.5× ALL diamonds.", unlockReq: "Beat Ender Dragon" },
+  // Mythic pet — beat all 3 Nightmare bosses
+  { id: "phoenix", name: "Phoenix", cost: 0, rarity: "mythic", color: "#FF6B00", abilityDesc: "2× diamonds + 1 Free Skip + 1 Free Hint.", unlockReq: "Beat all 3 Nightmare bosses" },
 ];
 
 export const BADGES = [
@@ -89,6 +104,11 @@ export const BADGES = [
   { id: "pet_3", name: "Pet Friend", icon: "🐾", desc: "Adopt 3 pets" },
   { id: "boss_1", name: "Boss Slayer", icon: "⚔️", desc: "Beat 1 boss" },
   { id: "boss_3", name: "Champion", icon: "👑", desc: "Beat all 3 bosses" },
+  { id: "nightmare_1", name: "Nightmare Survivor", icon: "🌑", desc: "Beat 1 Nightmare boss" },
+  { id: "nightmare_3", name: "Nightmare King", icon: "💀", desc: "Beat all 3 Nightmare bosses" },
+  { id: "mythic_1", name: "Mythic Touch", icon: "✨", desc: "Own a Mythic item" },
+  { id: "hard_streak", name: "Hard Hitter", icon: "🔥", desc: "Solve 25 Hard problems" },
+  { id: "endless_50", name: "Endless 50", icon: "♾️", desc: "Score 50+ in Endless Marathon" },
 ];
 
 export function loadState() {
@@ -134,6 +154,23 @@ export function checkBadges(state) {
       const bw = state.bossWins || {};
       return (bw.creeper_king || 0) >= 1 && (bw.skeleton_lord || 0) >= 1 && (bw.ender_dragon || 0) >= 1;
     }],
+    ["nightmare_1", () => {
+      const nw = state.nightmareWins || {};
+      return (nw.creeper_king || 0) + (nw.skeleton_lord || 0) + (nw.ender_dragon || 0) >= 1;
+    }],
+    ["nightmare_3", () => {
+      const nw = state.nightmareWins || {};
+      return (nw.creeper_king || 0) >= 1 && (nw.skeleton_lord || 0) >= 1 && (nw.ender_dragon || 0) >= 1;
+    }],
+    ["mythic_1", () => {
+      const mythicSkins = ["magma_beast", "frost_king", "shadow_ender"];
+      const mythicWeapons = ["inferno_blade", "frost_bow", "void_scythe"];
+      const mythicPets = ["phoenix"];
+      return (state.skins || []).some((s) => mythicSkins.includes(s)) ||
+             (state.weapons || []).some((w) => mythicWeapons.includes(w)) ||
+             (state.pets || []).some((p) => mythicPets.includes(p));
+    }],
+    ["endless_50", () => (state.endlessHighScore || 0) >= 50],
   ];
   const newlyEarned = [];
   for (const [id, ok] of rules) {
